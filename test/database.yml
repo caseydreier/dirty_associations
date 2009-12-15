@@ -1,0 +1,7 @@
+sqlite:
+  :adapter: sqlite
+  :database: <%=  File.join(File.dirname(__FILE__), 'dirty_associations.sqlite.db') %>
+
+sqlite3:
+  :adapter: sqlite3
+  :database: <%=  File.join(File.dirname(__FILE__), 'dirty_associations.sqlite3.db') %>

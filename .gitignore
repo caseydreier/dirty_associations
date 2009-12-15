@@ -1,0 +1,3 @@
+test/*.log
+test/*.sqlite3
+test/*.sqlite
