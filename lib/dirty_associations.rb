@@ -59,6 +59,11 @@ module DirtyAssociations
 		
     include InstanceMethods
   end
+
+  
+  module Settings
+    ALlOWED_ASSOCIATIONS = [:has_many, :has_and_belongs_to_many]
+  end
   
   module InstanceMethods
     
@@ -75,7 +80,7 @@ module DirtyAssociations
     def initialize_dirty_associations
       self.class.dirty_associations.each do |reflection|
         assoc_name = reflection.to_s.singularize
-        if respond_to?("#{assoc_name}_ids".to_sym)
+        if is_valid_association?(reflection)
           original_associations["#{assoc_name}_original_ids".to_sym] = send("#{assoc_name}_ids".to_sym).dup
           instance_eval <<-EOV
             def #{assoc_name}_ids_were; (original_associations["#{assoc_name}_original_ids".to_sym] || []).uniq; end;
@@ -114,6 +119,11 @@ module DirtyAssociations
       @original_associations ||= {}
     end
     
+    # Returns boolean if the given association is actually an active association of the current model  
+    def is_valid_association?(association_name)
+      type = self.class.reflect_on_association(association_name.to_sym) && self.class.reflect_on_association(association_name.to_sym).macro
+      DirtyAssociations::Settings::ALlOWED_ASSOCIATIONS.include?(type)
+    end
 
   end
   

@@ -35,6 +35,12 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     assert task.respond_to?(:track_association_changes)
   end
   
+  test "raise an error if given an invalid association" do
+    assert_raises ArgumentError do
+      t = Task.first
+    end
+  end
+  
   # test "throws an error if no associations are specified" do
   #   assert_raise ArgumentError do
   #     class Keyword < ActiveRecord::Base
