@@ -14,9 +14,9 @@ This plugin allows you to track changes made to the associated ids of a has_many
 You have to first enable tracking of specific associations in your model:
 
   class Task < ActiveRecord::Base
-	  has_and_belongs_to_many :keywords
+    has_and_belongs_to_many :keywords
     has_many :blocking_tasks
-	  keep_track_of :keywords, :blocking_tasks
+    keep_track_of :keywords, :blocking_tasks
   end
 
 Because of the database-overhead during the initialization process, you have to explicitly turn on dirty associations in the course of your code.  All commands will fall within a block statement.  The persistence of the change tracking will exist within the block only:
@@ -26,19 +26,19 @@ Because of the database-overhead during the initialization process, you have to 
 
     task.associations_changed? # false
     task.keyword_ids_changed?  # false
-	
-	  task.keywords << Keyword.first
-	  task.keywords << Keyword.last
-	
-	  task.keyword_ids_changed?  # true
-	  task.keyword_ids_removed?  # false
-	  task.keyword_ids_added?		 # true
-	  task.keyword_ids_added     # [30,450]
-	  task.keyword_ids_removed   # []
-	
-	end
-	
-	task.associations_changed?   # false
+
+    task.keywords << Keyword.first
+    task.keywords << Keyword.last
+
+    task.keyword_ids_changed?  # true
+    task.keyword_ids_removed?  # false
+    task.keyword_ids_added?    # true
+    task.keyword_ids_added     # [30,450]
+    task.keyword_ids_removed   # []
+
+  end
+
+  task.associations_changed?   # false
 
 
 Copyright (c) 2009 Casey Dreier, released under the MIT license

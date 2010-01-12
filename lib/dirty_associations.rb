@@ -18,9 +18,9 @@
 #
 # === Example
 #   class Task < ActiveRecord::Base
-# 	  has_and_belongs_to_many :keywords
+#     has_and_belongs_to_many :keywords
 #     has_many :blocking_tasks
-# 	  keep_track_of :keywords, :blocking_tasks
+#     keep_track_of :keywords, :blocking_tasks
 #   end
 # 
 #   task = Task.first
@@ -29,23 +29,23 @@
 #      => false
 #
 #   task.keyword_ids_changed?
-#		  => false
+#     => false
 #
 #   task.keywords << Keyword.first
 #   task.keywords << Keyword.last
 #
 #   task.associations_changed?
-#		  => true
+#     => true
 #
 #   task.keyword_ids_changed?
-# 	  => true
+#     => true
 #
 #   task.keyword_ids_added
-# 	  => [keyword_id1, keyword_id2]
+#     => [keyword_id1, keyword_id2]
 #
 #   task.save
 #   task.associations_changed?
-# 	  => true
+#     => true
 #   end
 #   task.associations_changed?
 #     => false
@@ -55,8 +55,8 @@ module DirtyAssociations
     self.dirty_associations = reflections.flatten.map(&:to_sym)
     
     # Alert the user if no names are defined
-		raise ArgumentError, "Please specify associations to track" if self.dirty_associations.empty?
-		
+    raise ArgumentError, "Please specify associations to track" if self.dirty_associations.empty?
+    
     include InstanceMethods
   end
 
@@ -98,21 +98,21 @@ module DirtyAssociations
     
     # Resets the association records
     def clear_association_changes
-			@original_associations = nil
-		end
-		
-		# Returns true if any of the valid associations have changed since tracking was initiated
-		def associations_changed?
-		  return false if original_associations.empty?
-		  self.class.dirty_associations.each do |reflection|
+      @original_associations = nil
+    end
+    
+    # Returns true if any of the valid associations have changed since tracking was initiated
+    def associations_changed?
+      return false if original_associations.empty?
+      self.class.dirty_associations.each do |reflection|
         assoc_name = reflection.to_s.singularize
         if respond_to?("#{assoc_name}_ids_changed?".to_sym)
           return true if send("#{assoc_name}_ids_changed?".to_sym)
         end
       end
       false
-		end
-		
+    end
+    
     private
     
     def original_associations
