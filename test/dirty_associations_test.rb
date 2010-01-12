@@ -22,8 +22,10 @@ class Dependency < ActiveRecord::Base
   belongs_to :blocking_task, :class_name => "Task", :foreign_key => "blocking_task_id"
 end
 
+
 class DirtyAssociationsTest < ActiveSupport::TestCase
 	load_test_schema
+	
 	setup :load_test_data
 	teardown :remove_test_data
 
@@ -35,30 +37,13 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     assert task.respond_to?(:track_association_changes)
   end
   
-  test "raise an error if given an invalid association" do
-    assert_raises ArgumentError do
-      t = Task.first
+  test "throws an error if no associations are specified" do
+    assert_raise ArgumentError do
+      class Keyword < ActiveRecord::Base
+        keep_track_of # this needs arguments....
+      end
     end
   end
-  
-  # test "throws an error if no associations are specified" do
-  #   assert_raise ArgumentError do
-  #     class Keyword < ActiveRecord::Base
-  #       keep_track_of # this needs arguments....
-  #     end
-  #   end
-  # end
-  
-  # test "throws an error if one of the provided associations to track is not valid" do
-  #   class Dependency < ActiveRecord::Base
-  #     keep_track_of :task # can't track one-to-one at the moment
-  #   end
-  #   
-  #   assert_raise ArgumentError do
-  #     dep = Dependency.first.begin_tracking_associations
-  #   end
-  #   
-  # end
   
   test "calling begin_tracking_associations initializes the tracking variables" do
     t = Task.first
