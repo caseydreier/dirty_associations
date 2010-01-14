@@ -59,11 +59,6 @@ module DirtyAssociations
     
     include InstanceMethods
   end
-
-  
-  module Settings
-    ALlOWED_ASSOCIATIONS = [:has_many, :has_and_belongs_to_many]
-  end
   
   module InstanceMethods
     
@@ -81,15 +76,11 @@ module DirtyAssociations
       self.class.dirty_associations.each do |reflection|
         assoc_name = reflection.to_s.singularize
         if is_valid_association?(reflection)
-          original_associations["#{assoc_name}_original_ids".to_sym] = send("#{assoc_name}_ids".to_sym).dup
-          instance_eval <<-EOV
-            def #{assoc_name}_ids_were; (original_associations["#{assoc_name}_original_ids".to_sym] || []).uniq; end;
-            def #{assoc_name}_ids_removed(); #{assoc_name}_ids_were - #{assoc_name}_ids; end;
-            def #{assoc_name}_ids_removed?(); !#{assoc_name.to_s.singularize}_ids_removed.empty?; end;
-            def #{assoc_name}_ids_added(); #{assoc_name}_ids - #{assoc_name}_ids_were; end;
-            def #{assoc_name}_ids_added?(); !#{assoc_name}_ids_added.empty?; end;
-            def #{assoc_name}_ids_changed?(); #{assoc_name}_ids_added? || #{assoc_name}_ids_removed?; end;
-          EOV
+          # TODO: Everything with assoc_name or reflection specified as a param should go
+          # into a class to do these calculations.
+          record_initial_association_ids!(assoc_name) 
+          generate_collection_methods(assoc_name) if collection_association?(reflection)
+          generate_singular_methods(assoc_name)   if singular_association?(reflection)
         else
           raise ArgumentError, "#{reflection} does not seem to be a valid association to track.  Please make sure you only use this for collections."
         end
@@ -115,14 +106,57 @@ module DirtyAssociations
     
     private
     
+    # Generates custom methods for tracking association id history for collection methods (has_many, habtm)
+    def generate_collection_methods(assoc_name)
+      instance_eval <<-EOV
+        def #{assoc_name}_ids_were; (original_associations["#{assoc_name}_original_ids".to_sym] || []).uniq; end;
+        def #{assoc_name}_ids_removed(); #{assoc_name}_ids_were - #{assoc_name}_ids; end;
+        def #{assoc_name}_ids_removed?(); !#{assoc_name.to_s.singularize}_ids_removed.empty?; end;
+        def #{assoc_name}_ids_added(); #{assoc_name}_ids - #{assoc_name}_ids_were; end;
+        def #{assoc_name}_ids_added?(); !#{assoc_name}_ids_added.empty?; end;
+        def #{assoc_name}_ids_changed?(); #{assoc_name}_ids_added? || #{assoc_name}_ids_removed?; end;
+      EOV
+    end
+    
+    # Copy the initial ids from the association
+    def record_initial_association_ids!(reflection)
+      assoc_name = reflection.to_s.singularize
+      if singular_association?(reflection)
+        original_associations["#{assoc_name}_original_id".to_sym] = __send__("#{assoc_name}_id".to_sym).dup
+      elsif collection_association?(reflection)
+        original_associations["#{assoc_name}_original_ids".to_sym] = __send__("#{assoc_name}_ids".to_sym).dup
+      end
+    end
+    
+    
+    # Determines if the given association is a collection of resources or a single resource
+    def association_type(reflection)
+      type = self.class.reflect_on_association(reflection.to_sym).macro
+      case
+      when [:has_many, :has_and_belongs_to_many].include?(type) then :collection
+      when [:belongs_to, :has_one].include?(type)               then :singular
+      else 
+        false
+      end
+    end
+    
+    # Returns true if the associations represents a single resource
+    def singular_association?(reflection)
+      association_type(reflection) == :singular
+    end
+
+    # Returns true if the association represents a collection
+    def collection_association?(reflection)
+      association_type(reflection) == :collection
+    end    
+    
     def original_associations
       @original_associations ||= {}
     end
     
     # Returns boolean if the given association is actually an active association of the current model  
     def is_valid_association?(association_name)
-      type = self.class.reflect_on_association(association_name.to_sym) && self.class.reflect_on_association(association_name.to_sym).macro
-      DirtyAssociations::Settings::ALlOWED_ASSOCIATIONS.include?(type)
+      !self.class.reflect_on_association(association_name.to_sym).nil?
     end
 
   end
