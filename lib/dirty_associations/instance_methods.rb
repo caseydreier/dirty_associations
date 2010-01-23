@@ -46,18 +46,6 @@ module DirtyAssociations
 
      private
 
-     # Generates custom methods for tracking association id history for collection methods (has_many, habtm)
-     def generate_collection_methods(assoc_name)
-       instance_eval <<-EOV
-         def #{assoc_name}_ids_were; (original_associations["#{assoc_name}_original_ids".to_sym] || []).uniq; end;
-         def #{assoc_name}_ids_removed(); #{assoc_name}_ids_were - #{assoc_name}_ids; end;
-         def #{assoc_name}_ids_removed?(); !#{assoc_name.to_s.singularize}_ids_removed.empty?; end;
-         def #{assoc_name}_ids_added(); #{assoc_name}_ids - #{assoc_name}_ids_were; end;
-         def #{assoc_name}_ids_added?(); !#{assoc_name}_ids_added.empty?; end;
-         def #{assoc_name}_ids_changed?(); #{assoc_name}_ids_added? || #{assoc_name}_ids_removed?; end;
-       EOV
-     end
-
      # Copy the initial ids from the association
      def record_initial_association_ids!(reflection)
        assoc_name = reflection.to_s.singularize

@@ -26,13 +26,6 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
   test "calling begin_tracking_associations initializes the tracking variables" do
     t = Task.first
     t.track_association_changes do
-    
-      assert t.respond_to?(:keyword_ids_changed?)
-  		assert t.respond_to?(:keyword_ids_added?)
-  		assert t.respond_to?(:keyword_ids_added)
-  		assert t.respond_to?(:keyword_ids_removed?)
-  		assert t.respond_to?(:keyword_ids_removed)
-  		assert t.respond_to?(:clear_association_changes)
 
   		assert t.respond_to?(:todo_ids_changed?)
   		assert t.respond_to?(:todo_ids_added?)

@@ -13,7 +13,15 @@ class BuilderTest < ActiveSupport::TestCase
 	  builder = DirtyAssociations::Builder.new(:keywords, task)
 	  assert !builder.association_name.blank?
 	  assert !builder.base.blank?
+	  assert !builder.association_name_singular.blank?
   end
+  
+  test "on initialize, the builder sets the singular version of the association name" do
+	  task = Task.first
+	  builder = DirtyAssociations::Builder.new(:keywords, task)
+	  assert_equal :keyword, builder.association_name_singular    
+  end
+  
   
   test "the method, is_singular?, should return a boolean false if the association is a collection association" do
     task = Task.first
@@ -37,6 +45,26 @@ class BuilderTest < ActiveSupport::TestCase
     todo = Todo.first
 	  builder = DirtyAssociations::Builder.new(:task, todo)     # task is belongs_to
 	  assert !builder.is_collection?
+  end
+  
+  test "calling generate_dirty_methods! will create a series of methods for a collection association" do
+    task = Task.first
+	  builder = DirtyAssociations::Builder.new(:keywords, task)
+	  builder.generate_dirty_methods!
+	  
+		assert task.respond_to?(:keywords_were)	  
+	  assert task.respond_to?(:keywords_changed?)
+		assert task.respond_to?(:keywords_added?)
+		assert task.respond_to?(:keywords_added)
+		assert task.respond_to?(:keywords_removed?)
+		assert task.respond_to?(:keywords_removed)
+		
+		assert task.respond_to?(:keyword_ids_were)	  
+	  assert task.respond_to?(:keyword_ids_changed?)
+		assert task.respond_to?(:keyword_ids_added?)
+		assert task.respond_to?(:keyword_ids_added)
+		assert task.respond_to?(:keyword_ids_removed?)
+		assert task.respond_to?(:keyword_ids_removed)
   end
   
   

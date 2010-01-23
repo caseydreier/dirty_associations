@@ -1,6 +1,17 @@
+require 'active_support'
+
 module DirtyAssociations
   class Builder < Struct.new :association_name, :base
+    include CollectionMethods
+   # include SingularMethods
     
+    attr_accessor :association_name_singular
+    
+    def initialize(association_name,base)
+      super(association_name,base)
+      self.association_name_singular = self.association_name.to_s.singularize.to_sym
+    end
+
     # Generates the methods used to track the association's changes
     # For collection associations:
     # * collection_plural_were
@@ -27,7 +38,7 @@ module DirtyAssociations
     # * collection_singular_id_removed?
     # * collection_singular_id_added?
     def generate_dirty_methods!
-      generate_collection_methods if is_collection?
+      generate_collection_methods! if is_collection?
       generate_singular_methods   if is_singular?
     end
     
