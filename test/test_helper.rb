@@ -39,3 +39,26 @@ def load_test_schema
   require File.join(File.dirname(__FILE__), '../init.rb')
 end
 
+
+def load_test_data
+	t1 = Task.create(:name => "New Test")
+
+	k1 = Keyword.create(:word => "RoR")
+	k2 = Keyword.create(:word => "Internet")
+	k3 = Keyword.create(:word => "Unassigned")
+
+	t1.keywords << k1
+	t1.keywords << k2
+
+	t1.todos.create(:description => "New Todo Item", :open => true)
+
+	t2 = Task.create(:name => "Blocked Test")
+	t2.blocking_tasks << t1
+end
+
+def remove_test_data
+	Task.delete_all
+	Keyword.delete_all
+	Todo.delete_all
+	Dependency.delete_all
+end

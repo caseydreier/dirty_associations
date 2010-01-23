@@ -50,17 +50,20 @@
 #   task.associations_changed?
 #     => false
 
-require 'dirty_associations/instance_methods'
-
 module DirtyAssociations
+  
+  autoload  :InstanceMethods,      'dirty_associations/instance_methods'
+  autoload  :Builder,              'dirty_associations/builder'
+  
   def keep_track_of(*associations)
+    raise ArgumentError, "Please specify associations to track" if associations.empty?
+    
     cattr_accessor :dirty_associations
     self.dirty_associations = associations.flatten.map(&:to_sym)
-    
-    # Alert the user if no names are defined
-    raise ArgumentError, "Please specify associations to track" if self.dirty_associations.empty?
-    
+
     include InstanceMethods
   end
+  
+  class InvalidAssociationError < ArgumentError; end;
   
 end

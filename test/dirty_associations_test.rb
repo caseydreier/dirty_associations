@@ -1,27 +1,5 @@
-require File.join(File.dirname(__FILE__), 'test_helper.rb')
-
-class Task < ActiveRecord::Base 
-	 has_many :todos
-	 has_and_belongs_to_many :keywords
-	 has_many :dependencies, :foreign_key => "task_id"
-   has_many :blocking_tasks, :through => :dependencies
-   keep_track_of :keywords, :todos, :blocking_tasks
-end 
-
-class Todo < ActiveRecord::Base 
-	 belongs_to :task
-end
-
-class Keyword < ActiveRecord::Base 
-	 has_and_belongs_to_many :tasks
-	 
-end 
-
-class Dependency < ActiveRecord::Base
-  belongs_to :task, :foreign_key => "task_id"
-  belongs_to :blocking_task, :class_name => "Task", :foreign_key => "blocking_task_id"
-end
-
+require 'test_helper.rb'
+require 'model_definitions'
 
 class DirtyAssociationsTest < ActiveSupport::TestCase
 	load_test_schema
@@ -201,29 +179,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 	  end
   end
   
-  
-	def load_test_data
-		t1 = Task.create(:name => "New Test")
 
-		k1 = Keyword.create(:word => "RoR")
-		k2 = Keyword.create(:word => "Internet")
-		k3 = Keyword.create(:word => "Unassigned")
-
-		t1.keywords << k1
-		t1.keywords << k2
-
-		t1.todos.create(:description => "New Todo Item", :open => true)
-
-		t2 = Task.create(:name => "Blocked Test")
-		t2.blocking_tasks << t1
-	end
-
-	def remove_test_data
-		Task.delete_all
-		Keyword.delete_all
-		Todo.delete_all
-		Dependency.delete_all
-	end
 
 
 end
