@@ -23,25 +23,6 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     end
   end
   
-  test "calling begin_tracking_associations initializes the tracking variables" do
-    t = Task.first
-    t.track_association_changes do
-
-  		assert t.respond_to?(:todo_ids_changed?)
-  		assert t.respond_to?(:todo_ids_added?)
-  		assert t.respond_to?(:todo_ids_added)
-  		assert t.respond_to?(:todo_ids_removed?)
-  		assert t.respond_to?(:todo_ids_removed)
-
-  		assert t.respond_to?(:blocking_task_ids_changed?)
-  		assert t.respond_to?(:blocking_task_ids_added?)
-  		assert t.respond_to?(:blocking_task_ids_added)
-  		assert t.respond_to?(:blocking_task_ids_removed?)
-  		assert t.respond_to?(:blocking_task_ids_removed)
-  		
-  	end
-  end
-  
   test "should record added and removed habtm associations" do
 		t = Task.first
 		t.track_association_changes do

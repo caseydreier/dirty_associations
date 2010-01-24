@@ -3,8 +3,7 @@ module DirtyAssociations
   module InstanceMethods
 
      # Called on an instance of the model whose associations we're interested in.  Inside the block,
-     # any modifications required are made to the object, and associations are tracked throughout the duration.
-     # After the block is executed, the associations are cleared up, and we stop paying attention.
+     # any changes to the associations are tracked. After the block is executed, the associations are reset.
      def track_association_changes(&block)
        raise ArgumentError, 'Must be called with a block!' unless block_given?
        validate_dirty_associations
@@ -13,16 +12,18 @@ module DirtyAssociations
        clear_association_changes
      end
 
+     # Generate the methods for each association, and record the initial state of each association specified.
      def initialize_dirty_associations
        self.class.dirty_associations.each do |association|
          builder = DirtyAssociations::Builder.new(association, self)
          builder.generate_dirty_methods!
+         
+         # Record the initial state of the association #
+         case
+         when builder.association_is_collection?  then  record_initial_collection_association_state!(association)
+         when builder.association_is_singular?    then  record_initial_singular_association_state!(association)
+         end
        end
-     end
-
-     # Resets the association records
-     def clear_association_changes
-       @original_associations = nil
      end
 
      # Returns true if any of the valid associations have changed since tracking was initiated
@@ -36,28 +37,30 @@ module DirtyAssociations
 
      private
 
-     # Copy the initial ids from the association
-     def record_initial_association_ids!(association)
-       association_name_singular = reflection.to_s.singularize
-       if singular_association?(reflection)
-         original_associations["#{association_name_singular}_original_id".to_sym] = __send__("#{assoc_name}_id".to_sym).dup
-       elsif collection_association?(reflection)
-         original_associations["#{association_name_singular}_original_ids".to_sym] = __send__("#{assoc_name}_ids".to_sym).dup
-       end
+     # Record the association id from a singular association
+     def record_initial_singular_association_state!(association)
+       original_associations["#{association}".to_sym] = __send__("#{association}_id".to_sym).dup
      end
 
-
- 
-
+     # Record the association ids from a collection association     
+     def record_initial_collection_association_state!(association)
+       original_associations["#{association}".to_sym] = __send__("#{association.to_s.singularize}_ids".to_sym).dup
+     end
+     
+     # Holds the original association ids for tracked associations
      def original_associations
-       @original_associations ||= {}
+       @_original_associations ||= {}
+     end
+     
+     # Resets the association records
+     def clear_association_changes
+       @_original_associations = {}
      end
 
      # Returns boolean if the given association is actually an active association of the current model  
      def is_valid_association?(association_name)
        !self.class.reflect_on_association(association_name.to_sym).nil?
      end
-     
      
      # Verify that the associations provided exist #
      def validate_dirty_associations

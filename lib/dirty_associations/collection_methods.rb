@@ -15,7 +15,7 @@ module DirtyAssociations
       
         # Returns an array of primary keys of the original state of this association when tracking began.
         def #{association_name_singular}_ids_were
-          (original_associations["#{association_name_singular}_original_ids".to_sym] || []).uniq
+          (original_associations["#{association_name}".to_sym] || []).uniq
         end
         
         # Return an array of primary keys of removed association records.

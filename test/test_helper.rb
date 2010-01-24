@@ -12,13 +12,13 @@ class ActiveSupport::TestCase
 end
 
 # This loads a custom schema into the DB (usually a SQLite one) for testing purposes of 
-# our plugin.  Pulls database.yml and schema.rb from the current test directory of the plugin
+# our plugin.  Pulls database.yml and schema.rb from the current test directory of the plugin.
 def load_test_schema 
   config = YAML::load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))  
   ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "debug.log"))
   db_adapter = ENV['DB']
   
-  # no db passed, try one of these fine config-free DBs before bombing.  
+  # no db passed, try one of these DBs before bombing.  
   db_adapter ||= begin 
     require 'sqlite'  
       'sqlite'
@@ -29,17 +29,18 @@ def load_test_schema
       rescue MissingSourceFile 
       end  
     end 
+
   if db_adapter.nil? 
     raise "No DB Adapter selected. Pass the DB= option to pick one, or install Sqlite or Sqlite3."  
   end 
-  
+
   # Load our plugin test schema into our DB #
   ActiveRecord::Base.establish_connection(config[db_adapter])  
   load(File.join(File.dirname(__FILE__), "schema.rb"))
   require File.join(File.dirname(__FILE__), '../init.rb')
 end
 
-
+# Populates our test db with some records.
 def load_test_data
 	t1 = Task.create(:name => "New Test")
 
@@ -56,6 +57,7 @@ def load_test_data
 	t2.blocking_tasks << t1
 end
 
+# Removes all test data from our test db.
 def remove_test_data
 	Task.delete_all
 	Keyword.delete_all
