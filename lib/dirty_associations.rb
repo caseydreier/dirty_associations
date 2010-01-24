@@ -1,6 +1,10 @@
 # This plugin provides a way to track changes made to a Model's associations via their primary keys.
 # You can ask if an association has changed, see which previous association's ids have been removed and which ones have been added.
-# 
+#
+# Author::    Casey Dreier
+# Copyright:: Copyright (c) 2010
+# License::   MIT
+#
 # You specify the associations to in the parent model.  In order to begin tracking changes, you must explicitly declare 
 # your desire to do so.  The instance method +track_association_changes+ accepts a block where you can operate on the object
 # as you wish.  Once the block is complete, any recorded changes are wiped clean.
@@ -52,19 +56,13 @@
 
 module DirtyAssociations
   
+  autoload  :Base,                 'dirty_associations/base'
   autoload  :InstanceMethods,      'dirty_associations/instance_methods'
   autoload  :Builder,              'dirty_associations/builder'
   autoload  :CollectionMethods,    'dirty_associations/collection_methods'
   autoload  :SingularMethods,      'dirty_associations/singular_methods'
   
-  def keep_track_of(*associations)
-    raise ArgumentError, "Please specify at least one association to track" if associations.empty?
-    
-    cattr_accessor :dirty_associations
-    self.dirty_associations = associations.flatten.map(&:to_sym)
-
-    include InstanceMethods
-  end
+  include DirtyAssociations::Base
   
   class InvalidAssociationError < ArgumentError; end;
   

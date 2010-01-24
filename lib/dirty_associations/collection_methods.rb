@@ -1,4 +1,7 @@
 module DirtyAssociations
+  # This module includes all the logic necessary to generate methods required for a collection 
+  # (one-to-many, many-to-many) association's dirty functionality.
+  # It also includes the descriptions of each method that will be generated.
   module CollectionMethods
     
     # Creates methods for dirty collections associations
@@ -7,7 +10,7 @@ module DirtyAssociations
       generate_collection_object_methods!
     end
     
-    # This generates the methods for handling calls to collection_singular_ids*
+    # This generates the methods for handling calls to _collection_singular_ids_*
     # They return the primary keys of the association records that have changed,
     # as well as adding a few boolean methods to quickly determine if they've changed at all.
     def generate_collection_id_methods!

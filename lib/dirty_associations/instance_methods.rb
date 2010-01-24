@@ -4,7 +4,7 @@ module DirtyAssociations
 
      # Called on an instance of the model whose associations we're interested in.  Inside the block,
      # any changes to the associations are tracked. After the block is executed, the associations are reset.
-     def track_association_changes(&block)
+     def enable_dirty_associations(&block)
        raise ArgumentError, 'Must be called with a block!' unless block_given?
        validate_dirty_associations
        initialize_dirty_associations
@@ -39,7 +39,7 @@ module DirtyAssociations
 
      # Record the association id from a singular association
      def record_initial_singular_association_state!(association)
-       original_associations["#{association}".to_sym] = __send__("#{association}_id".to_sym).dup
+       original_associations["#{association}".to_sym] = __send__("#{association}_id".to_sym)
      end
 
      # Record the association ids from a collection association     

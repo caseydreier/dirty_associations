@@ -1,8 +1,14 @@
 ActiveRecord::Schema.define(:version => 0) do  
   create_table "tasks", :force => true do |t|
-    t.string   "name",  :null => false
+    t.string   "name",              :null => false
+    t.integer  "user_id",           :precision => 38, :scale => 0, :null => false
+    t.integer  "preferred_user_id", :precision => 38, :scale => 0
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+  
+  create_table "users", :force => true do |t|
+    t.string   "username"
   end
   
   create_table "keywords", :force => true do |t|

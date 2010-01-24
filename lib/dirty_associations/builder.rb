@@ -1,10 +1,18 @@
 require 'active_support'
 
 module DirtyAssociations
+  # The Builder class takes the name of the association and the current model object and
+  # creates all of the dynamic methods for either a singular (one-to-one) association or a
+  # collection (one-to-many, many-to-many) association:
+  #
+  #   task = Task.new # AR model object
+  #   method_builder = Builder.new(:keywords, task)
+  #   method_builder.generate_dirty_methods! # => creates all the methods for the _keyword_ association
   class Builder < Struct.new :association_name, :base
     include CollectionMethods
     include SingularMethods
     
+    # The singular version of the association name
     attr_accessor :association_name_singular
     
     def initialize(association_name,base)

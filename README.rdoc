@@ -22,7 +22,7 @@ You have to first enable tracking of specific associations in your model:
 Because of the database-overhead during the initialization process, you have to explicitly turn on dirty associations in the course of your code.  All commands will fall within a block statement.  The persistence of the change tracking will exist within the block only:
 
   task = Task.first
-  task.track_association_changes do
+  task.enable_dirty_associations do
 
     task.associations_changed? # false
     task.keyword_ids_changed?  # false
@@ -41,4 +41,4 @@ Because of the database-overhead during the initialization process, you have to 
   task.associations_changed?   # false
 
 
-Copyright (c) 2009 Casey Dreier, released under the MIT license
+Copyright (c) 2010 Casey Dreier, released under the MIT license

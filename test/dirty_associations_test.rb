@@ -9,10 +9,10 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 
   test "plugin loads properly" do
     assert Task.respond_to?(:dirty_associations)
-    assert_equal 3, Task.dirty_associations.size
+    assert_equal 5, Task.dirty_associations.size # the number of associations to track
     
     task = Task.first
-    assert task.respond_to?(:track_association_changes)
+    assert task.respond_to?(:enable_dirty_associations)
   end
   
   test "throws an error if no associations are specified" do
@@ -25,7 +25,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
   
   test "should record added and removed habtm associations" do
 		t = Task.first
-		t.track_association_changes do
+		t.enable_dirty_associations do
 		
   		# Assert we have keywords #
   		assert t.keywords.size > 0
@@ -85,7 +85,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 	
 	test "no duplicates in mass-assignment of habtm ids" do
 		t = Task.first
-		t.track_association_changes do
+		t.enable_dirty_associations do
 		
   		original_keyword_ids = t.keyword_ids.dup
   		assert original_keyword_ids.size > 1
@@ -100,7 +100,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 		end
 		
 		t = Task.first
-		t.track_association_changes do
+		t.enable_dirty_associations do
 		
   		# Try the same problem from a different method # 		
   		keyword = t.keywords.first
@@ -117,7 +117,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 	
 	test "should record added and removed has_many => :through associations" do
 		t = Task.find_by_name("Blocked Test")
-		t.track_association_changes do
+		t.enable_dirty_associations do
 	  	assert t.blocking_tasks.size == 1
   		assert !t.associations_changed?
   		assert !t.blocking_task_ids_removed?
@@ -140,7 +140,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 	
 	test "building a new record should count as a changed association but not reflect in the changed ids list until it has an id" do 
 	  t = Task.first
-	  t.track_association_changes do
+	  t.enable_dirty_associations do
   	  assert !t.keyword_ids_changed?
   	  t.keywords.build(:word => "Custom Keyword")
 	  
@@ -153,7 +153,113 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
 	  end
   end
   
+  test "a has_one association returns the proper foreign key via the {singular_association}_id method" do
+    task = @preferred_user.preferred_task
+    @preferred_user.enable_dirty_associations do 
+      assert_equal task.id, @preferred_user.preferred_task_id
+    end
+  end
 
+  test "a dirty has_one association will report boolean true if it changed" do
+    task = @preferred_user.preferred_task
+    new_task = Task.first(:conditions => ["id <> ?",task.id] )
+    @preferred_user.enable_dirty_associations do 
+      @preferred_user.preferred_task = new_task
+      assert @preferred_user.preferred_task_changed?
+      assert @preferred_user.preferred_task_id_changed?
+      assert !@preferred_user.preferred_task_id_added?
+      assert !@preferred_user.preferred_task_added?
+      assert !@preferred_user.preferred_task_id_removed?
+      assert !@preferred_user.preferred_task_removed?
+    end    
+  end
 
+  test "a dirty has_one association will report boolean true a previously empty association was added" do
+    assert @u1.preferred_task.nil?
+    new_task = Task.first
+    @u1.enable_dirty_associations do 
+      @u1.preferred_task = new_task
+      assert @u1.preferred_task_changed?
+      assert @u1.preferred_task_id_changed?
+      assert @u1.preferred_task_added?
+      assert @u1.preferred_task_id_added?
+      assert !@u1.preferred_task_id_removed?
+      assert !@u1.preferred_task_removed?
+    end     
+  end  
 
+  test "a dirty has_one association will report boolean true for removal only if an existing record was removed" do
+    task = @preferred_user.preferred_task
+    @preferred_user.enable_dirty_associations do 
+      @preferred_user.preferred_task = nil
+      assert @preferred_user.preferred_task_changed?
+      assert @preferred_user.preferred_task_id_changed?
+      assert @preferred_user.preferred_task_removed?
+      assert @preferred_user.preferred_task_id_removed?
+      assert !@preferred_user.preferred_task_id_added?
+      assert !@preferred_user.preferred_task_added?
+    end    
+  end
+  
+  test "a dirty has_one association should return the original association's primary key from the _id_was method" do
+    task = @preferred_user.preferred_task
+    @preferred_user.enable_dirty_associations do 
+      @preferred_user.preferred_task = nil
+      assert @preferred_user.preferred_task.nil?
+      assert_equal task.id, @preferred_user.preferred_task_id_was
+    end    
+  end
+  
+  test "a dirty has_one association should return nil from the _was method when the original object no longer exists" do
+    task = @preferred_user.preferred_task
+    @preferred_user.enable_dirty_associations do 
+      @preferred_user.preferred_task.delete # removes object from the database.
+      assert_nil @preferred_user.preferred_task_was
+    end    
+  end
+
+  test "a dirty has_one association should return the old object from the _was method after the original object was de-associated" do
+    task = @preferred_user.preferred_task
+    @preferred_user.enable_dirty_associations do 
+      task.preferred_user_id = nil
+      task.save
+      assert_nil @preferred_user.preferred_task(true) # refresh this association
+      assert_equal task, @preferred_user.preferred_task_was
+    end    
+  end
+  
+  test "a dirty belongs_to association will report boolean true for the _changed? method if it was replaced with a new record" do
+    task = Task.first
+    task.user = User.first # I'm just being explicit here.  Note that this won't be tracked since it's outside of the block.
+    task.enable_dirty_associations do
+      task.user = User.last
+      assert task.user_changed?
+      assert !task.user_added?
+      assert !task.user_removed?
+    end
+    
+  end
+
+  test "a dirty belongs_to association should report boolean true for the _added? method if a new record was added to an empty association" do
+    task = Task.first
+    task.preferred_user = nil # Note that this won't be tracked since it's outside of the block.
+    task.enable_dirty_associations do
+      task.preferred_user = User.last
+      assert task.preferred_user_changed?
+      assert task.preferred_user_added?
+      assert !task.preferred_user_removed?
+    end
+    
+  end
+  
+  test "a dirty belongs_to association should report boolean true for the _removed? method if a new record was added to an empty association" do
+    task = Task.first
+    task.enable_dirty_associations do
+      task.user = nil
+      assert task.user_changed?
+      assert !task.user_added?
+      assert task.user_removed?
+    end
+  end
+  
 end

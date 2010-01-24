@@ -1,4 +1,6 @@
 module DirtyAssociations
+  # This module includes all the logic necessary to generate methods required for a singular (one-to-one) association's dirty functionality.
+  # It also includes the descriptions of each method that will be generated.
   module SingularMethods
 
     # Creates methods for dirty singular associations    
@@ -11,15 +13,22 @@ module DirtyAssociations
     # They return the primary key of the association's original state and current state 
     # as well as adding a few boolean methods to quickly determine if it's changed at all.
     def generate_singular_id_methods!
+      
+      # Make this check so we add this method only to has_one associations
+      unless self.base.respond_to?("#{association_name}_id".to_sym)
+        self.base.instance_eval <<-EOV
+          # Returns the primary_key of the current association record
+          def #{association_name}_id
+            #{association_name} ? #{association_name}.id : nil
+          end
+        EOV
+      end
+        
       self.base.instance_eval <<-EOV
-        # Returns the primary_key of the current association record
-        def #{association_name}_id()
-          #{association_name}.id
-        end
         
         # Returns the original id of the association at the start of association tracking
         def #{association_name}_id_was
-          original_associations["#{association_name}"].to_sym ||= nil
+          original_associations["#{association_name}".to_sym] ||= nil
         end
         
         # Boolean if the association has been removed and not replaced
@@ -48,7 +57,7 @@ module DirtyAssociations
         # Returns the old activerecord object, or nil if the object no longer exists
         def #{association_name}_was
           begin
-            #{association_name}.find(#{association_name}_id_was)
+            self.class.reflect_on_association(:#{association_name}).klass.find(#{association_name}_id_was)
           rescue ActiveRecord::RecordNotFound
             nil
           end

@@ -42,19 +42,22 @@ end
 
 # Populates our test db with some records.
 def load_test_data
-	t1 = Task.create(:name => "New Test")
-
-	k1 = Keyword.create(:word => "RoR")
-	k2 = Keyword.create(:word => "Internet")
-	k3 = Keyword.create(:word => "Unassigned")
-
-	t1.keywords << k1
-	t1.keywords << k2
-
-	t1.todos.create(:description => "New Todo Item", :open => true)
-
-	t2 = Task.create(:name => "Blocked Test")
-	t2.blocking_tasks << t1
+  @u1 = User.create(:username => "Alfonzo")
+  @preferred_user = User.create(:username => "Mortanzo")
+  
+	@t1 = Task.create(:name => "New Test", :user => @u1)
+  
+	@k1 = Keyword.create(:word => "RoR")
+	@k2 = Keyword.create(:word => "Internet")
+	@k3 = Keyword.create(:word => "Unassigned")
+  
+	@t1.keywords << @k1
+	@t1.keywords << @k2
+  
+	@t1.todos.create(:description => "New Todo Item", :open => true)
+  
+	@task_with_preferred_user = Task.create(:name => "Blocked Test", :user => @u1, :preferred_user => @preferred_user)
+	@task_with_preferred_user.blocking_tasks << @t1
 end
 
 # Removes all test data from our test db.
