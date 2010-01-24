@@ -33,12 +33,12 @@ module DirtyAssociations
         
         # Boolean if the association has been removed and not replaced
         def #{association_name}_id_removed?
-          #{association_name}.nil?
+          #{association_name}.blank? && !#{association_name}_id_was.blank?
         end
         
         # Boolean if the association was added where there previous was none before
         def #{association_name}_id_added?
-          #{association_name}_id_was.nil?
+          #{association_name}_id_was.blank? && !#{association_name}_id.blank?
         end
         
         # Boolean if the association has changed

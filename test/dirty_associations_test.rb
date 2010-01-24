@@ -133,10 +133,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
   		assert t.blocking_task_ids_removed.size == 1
   		assert_equal blocking_task_id, t.blocking_task_ids_removed.first
 		end
-		
-		
 	end
-	
 	
 	test "building a new record should count as a changed association but not reflect in the changed ids list until it has an id" do 
 	  t = Task.first
@@ -150,6 +147,41 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
   	  t.save
   	  assert t.keyword_ids_changed?
   	  assert !t.keyword_ids_added.empty?	  
+	  end
+  end
+  
+  test "calling the _were method for a has_many association returns the old objects associated with the initial state of the association" do
+    # Let's build the initial object and its children #
+    task = Task.create(:name => "new task", :user => User.first)
+    task.todos.create(:description => "write tests", :open => true)
+  	task.todos.create(:description => "write more tests", :open => true)
+  	task.todos.create(:description => "drink", :open => true)
+  	original_todos = task.todos.dup
+  	
+  	task.enable_dirty_associations do
+  	  task.todos.clear
+  	  assert task.todos_changed?
+  	  assert task.todos_removed?
+  	  assert_equal original_todos, task.todos_were
+  	  assert_equal original_todos, task.todos_removed
+	  end
+  end
+  
+  test "calling the _were method for a has_many association returns a partial result of the original objects if some where deleted" do
+    # Let's build the initial object and its children #
+    task = Task.create(:name => "new task", :user => User.first)
+    task.todos.create(:description => "write tests", :open => true)
+  	task.todos.create(:description => "write more tests", :open => true)
+  	task.todos.create(:description => "drink", :open => true)
+  	original_todos = task.todos.dup    
+    
+  	task.enable_dirty_associations do
+  	  task.todos.first.delete # delete from the db entirely
+  	  task.todos(true)
+  	  assert task.todos_changed?
+  	  assert task.todos_removed? # we still know that something *was* removed, even if it's not in the db anymore
+  	  assert_equal original_todos[1..2], task.todos_were # only loads the two that remain in the db
+  	  assert task.todos_removed.empty?
 	  end
   end
   
@@ -300,6 +332,27 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     @task_with_preferred_user.enable_dirty_associations do
       @task_with_preferred_user.preferred_user.delete
       assert_equal original_user_id, @task_with_preferred_user.preferred_user_id_was
+    end
+  end
+  
+  test "building a new association for a belongs_to should record change only after the parent record is saved" do
+    task = Task.new(:name => "test", :user => User.first)
+    task.enable_dirty_associations do
+      task.build_preferred_user(:username => 'onthefly')
+      assert !task.preferred_user_changed?
+      assert !task.preferred_user_added?
+      task.save
+      assert task.preferred_user_changed?
+      assert task.preferred_user_added?      
+    end
+  end
+  
+  test "creating a new association through a belongs_to will record the id immediately" do
+    task = Task.new(:name => "test", :user => User.first)
+    task.enable_dirty_associations do
+      task.create_preferred_user(:username => 'onthefly')
+      assert task.preferred_user_changed?
+      assert task.preferred_user_added?      
     end
   end
   
