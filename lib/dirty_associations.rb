@@ -54,6 +54,8 @@ module DirtyAssociations
   
   autoload  :InstanceMethods,      'dirty_associations/instance_methods'
   autoload  :Builder,              'dirty_associations/builder'
+  autoload  :CollectionMethods,    'dirty_associations/collection_methods'
+  autoload  :SingularMethods,      'dirty_associations/singular_methods'
   
   def keep_track_of(*associations)
     raise ArgumentError, "Please specify associations to track" if associations.empty?

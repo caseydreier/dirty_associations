@@ -3,7 +3,7 @@ require 'active_support'
 module DirtyAssociations
   class Builder < Struct.new :association_name, :base
     include CollectionMethods
-   # include SingularMethods
+    include SingularMethods
     
     attr_accessor :association_name_singular
     
@@ -38,17 +38,17 @@ module DirtyAssociations
     # * collection_singular_id_removed?
     # * collection_singular_id_added?
     def generate_dirty_methods!
-      generate_collection_methods! if is_collection?
-      generate_singular_methods   if is_singular?
+      generate_collection_methods! if association_is_collection?
+      generate_singular_methods   if association_is_singular?
     end
     
     # Returns boolean if the given association is a collection association (has_many, habtm)
-    def is_collection?
+    def association_is_collection?
       association_type == :collection
     end
     
     # Returns boolean if the given association is a singular association (has_one, belongs_to)
-    def is_singular?
+    def association_is_singular?
       association_type == :singular
     end
     

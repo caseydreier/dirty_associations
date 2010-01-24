@@ -23,28 +23,28 @@ class BuilderTest < ActiveSupport::TestCase
   end
   
   
-  test "the method, is_singular?, should return a boolean false if the association is a collection association" do
+  test "the method, association_is_singular?, should return a boolean false if the association is a collection association" do
     task = Task.first
 	  builder = DirtyAssociations::Builder.new(:keywords, task) # keywords is habtm
-	  assert !builder.is_singular?
+	  assert !builder.association_is_singular?
   end
   
-  test "the method, is_singular?, should return a boolean true if the association is a singular association" do
+  test "the method, association_is_singular?, should return a boolean true if the association is a singular association" do
     todo = Todo.first
 	  builder = DirtyAssociations::Builder.new(:task, todo)     # task is belongs_to
-	  assert builder.is_singular?
+	  assert builder.association_is_singular?
   end
   
-  test "the method, is_collection?, should return a boolean true if the association is a collection association" do
+  test "the method, association_is_collection?, should return a boolean true if the association is a collection association" do
     task = Task.first
 	  builder = DirtyAssociations::Builder.new(:blocking_tasks, task) # blocking_tasks is has_many through
-	  assert builder.is_collection?
+	  assert builder.association_is_collection?
   end
 
-  test "the method, is_collection?, should return a boolean false if the association is a singular association" do
+  test "the method, association_is_collection?, should return a boolean false if the association is a singular association" do
     todo = Todo.first
 	  builder = DirtyAssociations::Builder.new(:task, todo)     # task is belongs_to
-	  assert !builder.is_collection?
+	  assert !builder.association_is_collection?
   end
   
   test "calling generate_dirty_methods! will create a series of methods for a collection association" do

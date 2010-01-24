@@ -17,13 +17,6 @@ module DirtyAssociations
        self.class.dirty_associations.each do |association|
          builder = DirtyAssociations::Builder.new(association, self)
          builder.generate_dirty_methods!
-         
-
-         # TODO: Everything with assoc_name or reflection specified as a param should go
-         # into a class to do these calculations.
-# >          record_initial_association_ids!(assoc_name) 
-# >          generate_collection_methods(assoc_name) if collection_association?(reflection)
-# >          generate_singular_methods(assoc_name)   if singular_association?(reflection)
        end
      end
 
@@ -35,11 +28,8 @@ module DirtyAssociations
      # Returns true if any of the valid associations have changed since tracking was initiated
      def associations_changed?
        return false if original_associations.empty?
-       self.class.dirty_associations.each do |reflection|
-         assoc_name = reflection.to_s.singularize
-         if respond_to?("#{assoc_name}_ids_changed?".to_sym)
-           return true if send("#{assoc_name}_ids_changed?".to_sym)
-         end
+       self.class.dirty_associations.each do |association|
+         return true if __send__("#{association}_changed?".to_sym)
        end
        false
      end
@@ -47,12 +37,12 @@ module DirtyAssociations
      private
 
      # Copy the initial ids from the association
-     def record_initial_association_ids!(reflection)
-       assoc_name = reflection.to_s.singularize
+     def record_initial_association_ids!(association)
+       association_name_singular = reflection.to_s.singularize
        if singular_association?(reflection)
-         original_associations["#{assoc_name}_original_id".to_sym] = __send__("#{assoc_name}_id".to_sym).dup
+         original_associations["#{association_name_singular}_original_id".to_sym] = __send__("#{assoc_name}_id".to_sym).dup
        elsif collection_association?(reflection)
-         original_associations["#{assoc_name}_original_ids".to_sym] = __send__("#{assoc_name}_ids".to_sym).dup
+         original_associations["#{association_name_singular}_original_ids".to_sym] = __send__("#{assoc_name}_ids".to_sym).dup
        end
      end
 
