@@ -252,13 +252,54 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     
   end
   
-  test "a dirty belongs_to association should report boolean true for the _removed? method if a new record was added to an empty association" do
-    task = Task.first
-    task.enable_dirty_associations do
-      task.user = nil
-      assert task.user_changed?
-      assert !task.user_added?
-      assert task.user_removed?
+  test "a dirty belongs_to association should report boolean true for the _removed? method if the association was removed and not replaced" do
+    @task_with_preferred_user.enable_dirty_associations do
+      @task_with_preferred_user.preferred_user_id = nil
+      @task_with_preferred_user.preferred_user(true)
+      assert @task_with_preferred_user.preferred_user_changed?
+      assert !@task_with_preferred_user.preferred_user_added?
+      assert @task_with_preferred_user.preferred_user_removed?
+    end
+  end
+  
+  test "after initialization dirty associations should report no changes have been made" do
+    @task_with_preferred_user.enable_dirty_associations do
+      assert !@task_with_preferred_user.preferred_user_changed?
+      assert !@task_with_preferred_user.user_added?
+      assert !@task_with_preferred_user.preferred_user_removed?
+    end
+  end
+  
+  test "a dirty belongs_to association should return the original id of the association after a change has been made" do
+    original_user_id = @task_with_preferred_user.preferred_user.id
+    new_user = User.first(:conditions =>["id <> ?", @task_with_preferred_user.preferred_user_id])
+    @task_with_preferred_user.enable_dirty_associations do
+      @task_with_preferred_user.preferred_user = new_user
+      assert_equal original_user_id, @task_with_preferred_user.preferred_user_id_was
+    end
+  end
+  
+  test "a dirty belongs_to association should return the original object of the association after a change has been made, if it exists" do
+    original_user = @task_with_preferred_user.preferred_user.dup
+    new_user = User.first(:conditions =>["id <> ?", @task_with_preferred_user.preferred_user_id])
+    @task_with_preferred_user.enable_dirty_associations do
+      @task_with_preferred_user.preferred_user = new_user
+      assert_equal original_user, @task_with_preferred_user.preferred_user_was
+    end
+  end
+  
+  test "a dirty belongs_to association should return nil if the original object of the association was deleted" do
+    @task_with_preferred_user.enable_dirty_associations do
+      @task_with_preferred_user.preferred_user.delete
+      assert_nil @task_with_preferred_user.preferred_user_was
+    end
+  end  
+  
+  test "a dirty belongs_to association should return the original primary_key of the original object even if the association was deleted" do
+    original_user_id = @task_with_preferred_user.preferred_user.id
+    @task_with_preferred_user.enable_dirty_associations do
+      @task_with_preferred_user.preferred_user.delete
+      assert_equal original_user_id, @task_with_preferred_user.preferred_user_id_was
     end
   end
   
