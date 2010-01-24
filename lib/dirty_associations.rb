@@ -58,7 +58,7 @@ module DirtyAssociations
   autoload  :SingularMethods,      'dirty_associations/singular_methods'
   
   def keep_track_of(*associations)
-    raise ArgumentError, "Please specify associations to track" if associations.empty?
+    raise ArgumentError, "Please specify at least one association to track" if associations.empty?
     
     cattr_accessor :dirty_associations
     self.dirty_associations = associations.flatten.map(&:to_sym)

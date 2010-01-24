@@ -67,6 +67,23 @@ class BuilderTest < ActiveSupport::TestCase
 		assert task.respond_to?(:keyword_ids_removed)
   end
   
+  test "calling generate_dirty_methods! will create a series of methods for a singular association" do
+    todo = Todo.first
+	  builder = DirtyAssociations::Builder.new(:task, todo)
+	  builder.generate_dirty_methods!
+	  
+		assert todo.respond_to?(:task_was)	  
+	  assert todo.respond_to?(:task_changed?)
+	  assert todo.respond_to?(:task_removed?)
+	  assert todo.respond_to?(:task_added?)
+		assert todo.respond_to?(:task_id)
+		assert todo.respond_to?(:task_id_was)	  
+	  assert todo.respond_to?(:task_id_changed?)
+	  assert todo.respond_to?(:task_id_removed?)
+	  assert todo.respond_to?(:task_id_added?)	 
+	      
+  end
+  
   
   
 end

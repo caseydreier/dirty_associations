@@ -39,7 +39,7 @@ module DirtyAssociations
     # * collection_singular_id_added?
     def generate_dirty_methods!
       generate_collection_methods! if association_is_collection?
-      generate_singular_methods   if association_is_singular?
+      generate_singular_methods!   if association_is_singular?
     end
     
     # Returns boolean if the given association is a collection association (has_many, habtm)
