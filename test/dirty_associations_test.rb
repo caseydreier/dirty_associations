@@ -182,9 +182,65 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
   	  assert task.todos_removed? # we still know that something *was* removed, even if it's not in the db anymore
   	  assert_equal original_todos[1..2], task.todos_were # only loads the two that remain in the db
   	  assert task.todos_removed.empty?
+  	  assert original_todos.first.id, task.todo_ids_removed.first # we still have the id of the non-existent record
 	  end
   end
   
+  test "calling the _were method for a habtm association returns the old objects associated with the initial state of the association" do
+    assert @t1.keywords.size > 0 # keywords is habtm
+  	original_keywords = @t1.keywords.dup
+  	
+  	@t1.enable_dirty_associations do
+  	  @t1.keywords.clear
+  	  assert @t1.keywords_changed?
+  	  assert @t1.keywords_removed?
+  	  assert_equal original_keywords, @t1.keywords_were
+  	  assert_equal original_keywords, @t1.keywords_removed
+	  end
+  end
+  
+  test "calling the _were method for a habtm association returns a partial result of the original objects if some where deleted" do
+    assert @t1.keywords.size > 0 # keywords is habtm
+  	original_keywords = @t1.keywords.dup
+  	
+  	@t1.enable_dirty_associations do
+  	  @t1.keywords.first.delete
+  	  @t1.keywords(true) # reload association
+  	  assert @t1.keywords_changed?
+  	  assert @t1.keywords_removed?
+      assert_equal original_keywords[1..original_keywords.size], @t1.keywords_were # only loads the two that remain in the db
+  	  assert @t1.keywords_removed.empty?
+  	  assert original_keywords.first.id, @t1.keyword_ids_removed.first # we still have the id of the non-existent record
+	  end
+  end
+
+	test "calling the _were method for a has_many => :through association returns the old objects associated with the initial state of the association" do
+		t = Task.find_by_name("Blocked Test")
+		t.enable_dirty_associations do
+	  	assert t.blocking_tasks.size == 1 # blocking_tasks is has_many, through
+		
+  		# check to see they remove correctly #
+  		original_blocking_task = t.blocking_tasks.first.dup
+		
+  		t.blocking_tasks.clear
+  		assert t.blocking_tasks_removed?
+  		assert_equal original_blocking_task, t.blocking_tasks_removed.first
+  		assert_equal original_blocking_task, t.blocking_tasks_were.first  		
+		end
+	end 
+
+	test "calling the _were method for a has_many => :through association returns partial collection of objects if some were deleted" do
+		t = Task.find_by_name("Blocked Test")
+		t.enable_dirty_associations do
+	  	assert t.blocking_tasks.size == 1 # blocking_tasks is has_many, through		
+  		t.blocking_tasks.first.delete
+  		assert t.blocking_tasks_removed?
+  		assert t.blocking_tasks_were.empty?
+  		assert t.blocking_tasks_removed.empty?
+  		assert !t.blocking_task_ids_were.empty?
+		end
+	end
+	  
   test "a has_one association returns the proper foreign key via the {singular_association}_id method" do
     task = @preferred_user.preferred_task
     @preferred_user.enable_dirty_associations do 
