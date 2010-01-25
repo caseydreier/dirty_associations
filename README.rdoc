@@ -1,25 +1,52 @@
-=DirtyAssociations
+=Dirty Associations
 
-This plugin allows you to track changes made to the associated ids of a has_many or a has_and_belongs_to_many association.  The usage is similar to the dirty objects behavior in Rails.  You get the following free methods for enabled associations:
+This plugin adds dirty-attribute-like methods for your model's associations.  The usage is very similar to the dirty objects behavior in Rails, except that due to the high database-overhead of the initialization process, you have to explicitly enable this functionality.
+Once enabled, you get the following methods for specified collection associations (one-to-many, many-to-many):
 
- * collection_ids_changed?
- * collection_ids_added?
- * collection_ids_removed?
- * collection_ids_added
- * collection_ids_removed
+ * collection_singular_ids_changed?
+ * collection_singular_ids_added?
+ * collection_singular_ids_removed?
+ * collection_singular_ids_added
+ * collection_singular_ids_removed
+ * collection_singular_ids_were
+ * collection_changed?
+ * collection_added?
+ * collection_removed?
+ * collection_added
+ * collection_removed
+ * collection_were
  * associations_changed?
+
+For singular associations (one-to-one), you get these methods:
+
+ * association_id_changed?
+ * association_id_added?
+ * association_id_removed?
+ * association_id_was
+ * association_changed?
+ * association_added?
+ * association_removed?
+ * association_was
+
+=Installation
+
+Currently, this only exists as a plugin.  You can install it with:
+
+  script/plugin install git://github.com/daphonz/dirty_associations.git
+
 
 =Example
 
-You have to first enable tracking of specific associations in your model:
+You must specify which associations you would like to make dirty in your model:
 
   class Task < ActiveRecord::Base
     has_and_belongs_to_many :keywords
     has_many :blocking_tasks
-    keep_track_of :keywords, :blocking_tasks
+    belongs_to :user
+    keep_track_of :keywords, :user
   end
 
-Because of the database-overhead during the initialization process, you have to explicitly turn on dirty associations in the course of your code.  All commands will fall within a block statement.  The persistence of the change tracking will exist within the block only:
+You specify the scope in which you'll track the changes to the associations by calling <tt>enable_dirty_associations</tt> on the instantiated model object, which accepts a block.  All modifications you make to the object's associations that fall within this block statement are recorded.  This record persists throughout the block, but not outside of it:
 
   task = Task.first
   task.enable_dirty_associations do
@@ -34,7 +61,13 @@ Because of the database-overhead during the initialization process, you have to 
     task.keyword_ids_removed?  # false
     task.keyword_ids_added?    # true
     task.keyword_ids_added     # [30,450]
+    task.keywords_added        # ...collection of keyword objects that were added...
     task.keyword_ids_removed   # []
+    
+    task.create_user(:name => "Joey Joe Joe Jr.")
+    
+    task.user_changed?         # true
+    task.user_was              # ...original user object...
 
   end
 

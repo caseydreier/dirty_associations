@@ -18,7 +18,7 @@
 # * association_singular_ids_added
 # 
 # As well as a method that tells you if any associations changed:
-# * associations_changed? # Note this is actually uses the word, "associations" as the actual method name
+# * associations_changed? # Note this is actually uses the word, "associations" in the actual method name
 #
 # === Example
 #   class Task < ActiveRecord::Base

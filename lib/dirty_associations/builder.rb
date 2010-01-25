@@ -7,7 +7,7 @@ module DirtyAssociations
   #
   #   task = Task.new # AR model object
   #   method_builder = Builder.new(:keywords, task)
-  #   method_builder.generate_dirty_methods! # => creates all the methods for the _keyword_ association
+  #   method_builder.generate_dirty_methods! # => creates all the methods for the :keywords association
   class Builder < Struct.new :association_name, :base
     include CollectionMethods
     include SingularMethods
