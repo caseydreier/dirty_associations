@@ -1,14 +1,14 @@
 # These are models to use during the testing instances #
 
 class Task < ActiveRecord::Base 
-	 has_many :todos
-	 has_many :dependencies, 
-	          :foreign_key => "task_id"
+   has_many :todos
+   has_many :dependencies, 
+            :foreign_key => "task_id"
    has_many :blocking_tasks, 
             :through => :dependencies
             
-	 has_and_belongs_to_many :keywords
-	 
+   has_and_belongs_to_many :keywords
+   
    belongs_to :user
    belongs_to :preferred_user, :class_name => "User"
    
@@ -23,12 +23,12 @@ class User < ActiveRecord::Base
 end
 
 class Todo < ActiveRecord::Base 
-	 belongs_to :task
+   belongs_to :task
 end
 
 class Keyword < ActiveRecord::Base 
-	 has_and_belongs_to_many :tasks
-	 
+   has_and_belongs_to_many :tasks
+   
 end 
 
 class Dependency < ActiveRecord::Base

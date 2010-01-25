@@ -45,25 +45,25 @@ def load_test_data
   @u1 = User.create(:username => "Alfonzo")
   @preferred_user = User.create(:username => "Mortanzo")
   
-	@t1 = Task.create(:name => "New Test", :user => @u1)
+  @t1 = Task.create(:name => "New Test", :user => @u1)
   
-	@k1 = Keyword.create(:word => "RoR")
-	@k2 = Keyword.create(:word => "Internet")
-	@k3 = Keyword.create(:word => "Unassigned")
+  @k1 = Keyword.create(:word => "RoR")
+  @k2 = Keyword.create(:word => "Internet")
+  @k3 = Keyword.create(:word => "Unassigned")
   
-	@t1.keywords << @k1
-	@t1.keywords << @k2
+  @t1.keywords << @k1
+  @t1.keywords << @k2
   
-	@t1.todos.create(:description => "New Todo Item", :open => true)
+  @t1.todos.create(:description => "New Todo Item", :open => true)
   
-	@task_with_preferred_user = Task.create(:name => "Blocked Test", :user => @u1, :preferred_user => @preferred_user)
-	@task_with_preferred_user.blocking_tasks << @t1
+  @task_with_preferred_user = Task.create(:name => "Blocked Test", :user => @u1, :preferred_user => @preferred_user)
+  @task_with_preferred_user.blocking_tasks << @t1
 end
 
 # Removes all test data from our test db.
 def remove_test_data
-	Task.delete_all
-	Keyword.delete_all
-	Todo.delete_all
-	Dependency.delete_all
+  Task.delete_all
+  Keyword.delete_all
+  Todo.delete_all
+  Dependency.delete_all
 end
