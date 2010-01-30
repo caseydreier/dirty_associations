@@ -1,0 +1,8 @@
+# Version 1.1.0
+
+* Added the option to pass the :all option to the method, keep_track_of, in order to track all available associations
+  without having to specify each single one.
+
+# Version 1.0.0
+
+* Initial release.

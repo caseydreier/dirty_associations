@@ -6,9 +6,19 @@ module DirtyAssociations
      # any changes to the associations are tracked. After the block is executed, the associations are reset.
      def enable_dirty_associations(&block)
        raise ArgumentError, 'Must be called with a block!' unless block_given?
+       
+       # If the user passes ":all", scan the model and set tracking on all the associations
+       # That is unless there is an "all" assocition defined, in which case, continue without setting all assocations
+       populate_dirty_associtaions_with_all_associations! if !is_valid_association?(:all) && self.class.dirty_associations.delete(:all)
+       
+       # Go and validate to make sure these associations are named properly
        validate_dirty_associations
+       
+       # Initialize the initial values and construct the dirty methods for each association
        initialize_dirty_associations
        yield
+       
+       # Clear out when the block ends
        clear_association_changes
      end
 
@@ -67,6 +77,11 @@ module DirtyAssociations
        self.class.dirty_associations.each do |association_name|
          raise DirtyAssociations::InvalidAssociationError, "#{association_name} does not seem to be a valid association to track" unless is_valid_association?(association_name)
        end
+     end
+     
+     # Collect all association names and populate the class variable +dirty_associations+ with them.
+     def populate_dirty_associtaions_with_all_associations!
+       self.class.dirty_associations = self.class.reflect_on_all_associations.map(&:name)
      end
 
    end

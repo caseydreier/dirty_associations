@@ -412,4 +412,27 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     end
   end
   
+  test "calling 'keep_track_of :all' should track all listed associations for a model" do
+    # The Comment model calls: keep_track_of :all
+    @comment1.enable_dirty_associations do
+      assert_equal ["task", "responses", "parent"].sort, @comment1.class.dirty_associations.map {|a| a.to_s}.sort
+    end
+  end
+  
+  test "association tracking returns valid objects for self-referencing associations" do
+    # The Comment model uses a self-referencing association for responses to a comment.
+    @comment1.enable_dirty_associations do
+      # Create a new child comment
+      new_comment = @comment1.responses.create(:body => 'Newest response', :task => @t1)
+      
+      # Make sure the associations changed properly
+      assert @comment1.associations_changed?
+      
+      # Assert that the added object is the same as the one created
+      assert_equal new_comment, @comment1.responses_added.first
+    end
+  end
+  
+  
+  
 end

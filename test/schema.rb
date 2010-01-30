@@ -33,4 +33,12 @@ ActiveRecord::Schema.define(:version => 0) do
     t.integer "blocking_task_id", :precision => 38, :scale => 0, :null => false
   end
   
+  create_table "comments", :force => true do |t|
+    t.integer  "parent_id",        :precision => 38, :scale => 0, :null => true
+    t.integer  "task_id",          :precision => 38, :scale => 0, :null => false
+    t.text     "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+  
 end
