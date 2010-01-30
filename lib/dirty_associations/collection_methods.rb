@@ -2,6 +2,33 @@ module DirtyAssociations
   # This module includes all the logic necessary to generate methods required for a collection 
   # (one-to-many, many-to-many) association's dirty functionality.
   # It also includes the descriptions of each method that will be generated.
+  # The following methods are created for collection associations:
+  #
+  # [collection_changed?]
+  #  Returns +true+ if the association collection has changed.
+  # [collection_added?]
+  #  Returns +true+ if new records have been added to the association collection.
+  # [collection_removed?]
+  #  Returns +true+ if records have been removed from the association collection.
+  # [collection_added]
+  #  Returns an array of associated objects that have been added to this collection.
+  # [collection_removed]
+  #  Returns an array of associated objects that have been removed from the collection, if they still exist.
+  #  This will not raise any exceptions if any objects no longer exist, it just won't return them.
+  # [collection_were]
+  #  Returns an array of the association's objects as they were at the start of association tracking.
+  # [collection_singular_ids_changed?]
+  #  Returns +true+ if the association collection has changed.
+  # [collection_singular_ids_added?]
+  #  Returns +true+ if new records have been added to the association collection.
+  # [collection_singular_ids_removed?]
+  #  Returns +true+ if records have been removed from the association collection.
+  # [collection_singular_ids_added]
+  #  Returns an array of associated objects' ids that have been added to the collection.
+  # [collection_singular_ids_removed]
+  #  Returns an array of associated objects' ids that have been removed from the collection.
+  # [collection_singular_ids_were]
+  #  Returns an array of the associated objects' ids as they were at the start of association tracking.
   module CollectionMethods
     
     # Creates methods for dirty collections associations

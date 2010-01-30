@@ -36,15 +36,15 @@ module DirtyAssociations
     # * collection_singular_ids_added
     # 
     # For singular associations:
-    # * collection_singular_was
-    # * collection_singular_added?
-    # * collection_singular_removed?
-    # * collection_singular_changed?
-    # * collection_singular_id
-    # * collection_singular_id_was
-    # * collection_singular_id_changed? 
-    # * collection_singular_id_removed?
-    # * collection_singular_id_added?
+    # * association_was
+    # * association_added?
+    # * association_removed?
+    # * association_changed?
+    # * association_id
+    # * association_id_was
+    # * association_id_changed? 
+    # * association_id_removed?
+    # * association_id_added?
     def generate_dirty_methods!
       generate_collection_methods! if association_is_collection?
       generate_singular_methods!   if association_is_singular?

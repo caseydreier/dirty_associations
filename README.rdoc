@@ -3,31 +3,61 @@
 This plugin adds dirty-attribute-like methods for your model's associations.  The usage is very similar to the dirty objects behavior in Rails, except that due to the high database-overhead of the initialization process, you have to explicitly enable this functionality.
 Once enabled, you get the following methods for specified collection associations (one-to-many, many-to-many):
 
- * collection_singular_ids_changed?
- * collection_singular_ids_added?
- * collection_singular_ids_removed?
- * collection_singular_ids_added
- * collection_singular_ids_removed
- * collection_singular_ids_were
- * collection_changed?
- * collection_added?
- * collection_removed?
- * collection_added
- * collection_removed
- * collection_were
- * associations_changed?
+[collection_changed?]
+ Returns +true+ if the association collection has changed.
+[collection_added?]
+ Returns +true+ if new records have been added to the association collection.
+[collection_removed?]
+ Returns +true+ if records have been removed from the association collection.
+[collection_added]
+ Returns an array of associated objects that have been added to this collection.
+[collection_removed]
+ Returns an array of associated objects that have been removed from the collection, if they still exist.
+ This will not raise any exceptions if any objects no longer exist, it just won't return them.
+[collection_were]
+ Returns an array of the association's objects as they were at the start of association tracking.
+[collection_singular_ids_changed?]
+ Returns +true+ if the association collection has changed.
+[collection_singular_ids_added?]
+ Returns +true+ if new records have been added to the association collection.
+[collection_singular_ids_removed?]
+ Returns +true+ if records have been removed from the association collection.
+[collection_singular_ids_added]
+ Returns an array of associated objects' ids that have been added to the collection.
+[collection_singular_ids_removed]
+ Returns an array of associated objects' ids that have been removed from the collection.
+[collection_singular_ids_were]
+ Returns an array of the associated objects' ids as they were at the start of association tracking.
+
+(Note: +collection+ is replaced with name of the tracked association.)
 
 For singular associations (one-to-one), you get these methods:
 
- * association_id_changed?
- * association_id_added?
- * association_id_removed?
- * association_id_was
- * association_changed?
- * association_added?
- * association_removed?
- * association_was
+[association_changed?]
+  Returns +true+ when the association has changed.
+[association_added?]
+  Returns +true+ if an object was added to a previously empty association.
+[association_removed?]
+  Returns +true+ if an object was removed from the association, leaving it empty.
+[association_was]
+  Returns the original object of the association. +nil+ if it no longer exists.
+[association_id_changed?]
+   Returns +true+ if the association object has changed.
+[association_id_added?]
+  Returns +true+ if an object was added to a previously empty association.
+[association_id_removed?]
+  Returns +true+ if an object was removed from the association, leaving it empty.
+[association_id_was]
+  Returns the original association object's id.
+[association_id]
+  Returns the current association object's id.
 
+(Note: +association+ is replaced with name of the tracked association.)
+
+And all associations get the following method:
+[associations_changed?]
+  Returns +true+ if any of the tracked associations have changed.
+  
 =Installation
 
 Currently, this only exists as a plugin.  You can install it with:
@@ -74,4 +104,4 @@ You specify the scope in which you'll track the changes to the associations by c
   task.associations_changed?   # false
 
 
-Copyright (c) 2010 Casey Dreier, released under the MIT license
+Copyright (c) 2010 Casey Dreier, released under the MIT license.

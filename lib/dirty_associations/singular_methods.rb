@@ -1,6 +1,26 @@
 module DirtyAssociations
   # This module includes all the logic necessary to generate methods required for a singular (one-to-one) association's dirty functionality.
   # It also includes the descriptions of each method that will be generated.
+  # The following methods are created for singular associations:
+  #
+  # [association_changed?]
+  #   Returns +true+ when the association has changed.
+  # [association_added?]
+  #   Returns +true+ if an object was added to a previously empty association.
+  # [association_removed?]
+  #   Returns +true+ if an object was removed from the association, leaving it empty.
+  # [association_was]
+  #   Returns the original object of the association. +nil+ if it no longer exists.
+  # [association_id_changed?]
+  #    Returns +true+ if the association object has changed.
+  # [association_id_added?]
+  #   Returns +true+ if an object was added to a previously empty association.
+  # [association_id_removed?]
+  #   Returns +true+ if an object was removed from the association, leaving it empty.
+  # [association_id_was]
+  #   Returns the original association object's id.
+  # [association_id]
+  #   Returns the current association object's id.
   module SingularMethods
 
     # Creates methods for dirty singular associations    
