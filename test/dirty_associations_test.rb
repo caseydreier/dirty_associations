@@ -234,6 +234,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     t.enable_dirty_associations do
       assert t.blocking_tasks.size == 1 # blocking_tasks is has_many, through   
       t.blocking_tasks.first.delete
+      t.blocking_tasks(true)
       assert t.blocking_tasks_removed?
       assert t.blocking_tasks_were.empty?
       assert t.blocking_tasks_removed.empty?

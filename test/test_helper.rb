@@ -1,9 +1,6 @@
 ENV["RAILS_ENV"] = "test"
 plugin_test_dir = File.dirname(__FILE__)
 require File.join(plugin_test_dir, '../../../../config/environment')
-require 'rubygems'
-require 'active_support'
-require 'active_support/test_case'
 require 'test_help'
 
 class ActiveSupport::TestCase
