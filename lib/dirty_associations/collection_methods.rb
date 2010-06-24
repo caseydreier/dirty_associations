@@ -93,7 +93,11 @@ module DirtyAssociations
         def #{association_name}_removed
           primary_key = self.class.reflect_on_association(:#{association_name}).klass.primary_key
           ids_string = #{association_name_singular}_ids_removed * ','
-          self.class.reflect_on_association(:#{association_name}).klass.all(:conditions => [primary_key + " IN (" + ids_string + ")"])
+          if ids_string.blank?  # mysql complains about the query below when ids_string is blank, so we check here
+            []
+          else
+            self.class.reflect_on_association(:#{association_name}).klass.all(:conditions => [primary_key + " IN (" + ids_string + ")"])
+          end
         end
         
         # Returns a collection of objects that have been added to the current record since tracking began.
