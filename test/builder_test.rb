@@ -1,5 +1,5 @@
-require 'test_helper'
-require 'model_definitions'
+require File.join( File.dirname(__FILE__), 'test_helper' )
+require File.join( File.dirname(__FILE__), 'model_definitions' )
 
 class BuilderTest < ActiveSupport::TestCase
   
