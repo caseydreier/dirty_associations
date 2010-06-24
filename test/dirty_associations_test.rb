@@ -176,6 +176,7 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     original_todos = task.todos.dup    
     
     task.enable_dirty_associations do
+      assert task.todos_added.empty?
       assert task.todos_removed.empty?
 
       task.todos.first.delete # delete from the db entirely
