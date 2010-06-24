@@ -1,3 +1,11 @@
+mysql:
+  :adapter: mysql
+  :database: dirty_associations_plugin_test
+  # these need to be changed to match your db settings
+  # :username: 
+  # :password: 
+  # :host: localhost  
+
 sqlite:
   :adapter: sqlite
   :database: <%=  File.join(File.dirname(__FILE__), 'dirty_associations.sqlite.db') %>
