@@ -1,5 +1,5 @@
-require 'test_helper.rb'
-require 'model_definitions'
+require File.join( File.dirname(__FILE__), 'test_helper' )
+require File.join( File.dirname(__FILE__), 'model_definitions' )
 
 class DirtyAssociationsTest < ActiveSupport::TestCase
   load_test_schema
@@ -176,6 +176,8 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     original_todos = task.todos.dup    
     
     task.enable_dirty_associations do
+      assert task.todos_removed.empty?
+
       task.todos.first.delete # delete from the db entirely
       task.todos(true)
       assert task.todos_changed?
