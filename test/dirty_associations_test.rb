@@ -176,9 +176,6 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     original_todos = task.todos.dup    
     
     task.enable_dirty_associations do
-      assert task.todos_added.empty?
-      assert task.todos_removed.empty?
-
       task.todos.first.delete # delete from the db entirely
       task.todos(true)
       assert task.todos_changed?
@@ -437,6 +434,19 @@ class DirtyAssociationsTest < ActiveSupport::TestCase
     end
   end
   
+  # this was added to deal with a bug on MySQL when calling _removed on a non-dirty record
+  test "calling the _added and _removed methods for a has_many association on a non-dirty record returns empty" do
+    # Let's build the initial object and its children #
+    task = Task.create(:name => "new task", :user => User.first)
+    task.todos.create(:description => "write tests", :open => true)
+    task.todos.create(:description => "write more tests", :open => true)
+    task.todos.create(:description => "drink", :open => true)
+    
+    task.enable_dirty_associations do
+      assert task.todos_added.empty?
+      assert task.todos_removed.empty?
+    end
+  end
   
   
 end
