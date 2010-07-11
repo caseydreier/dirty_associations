@@ -4,7 +4,8 @@ mysql:
   # these need to be changed to match your db settings
   # :username: 
   # :password: 
-  # :host: localhost  
+  # :host: localhost
+  # :socket: /tmp/mysql.sock
 
 sqlite:
   :adapter: sqlite
